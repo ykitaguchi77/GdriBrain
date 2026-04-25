@@ -1,0 +1,91 @@
+name: GdriBrain
+options:
+  bundleIdPrefix: com.ykitaguchi.gdribrain
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+# Project-level xcconfig — exposes GOOGLE_OAUTH_CLIENT_ID at build time.
+# Copy Config/GdriBrain.xcconfig.example to Config/GdriBrain.xcconfig and
+# fill in the real client ID. The file is gitignored.
+configFiles:
+  Debug: Config/GdriBrain.xcconfig
+  Release: Config/GdriBrain.xcconfig
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    DEVELOPMENT_TEAM: "" # set per-developer in Xcode
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+  GdriBrain:
+    type: application
+    platform: iOS
+    sources:
+      - path: GdriBrain
+    resources:
+      - path: GdriBrain/Assets.xcassets
+        optional: true
+    info:
+      path: GdriBrain/Info.plist
+      properties:
+        CFBundleDisplayName: GdriBrain
+        UILaunchScreen: {}
+        UIApplicationSupportsMultipleScenes: false
+        CFBundleURLTypes:
+          - CFBundleURLName: com.ykitaguchi.gdribrain.oauth
+            CFBundleURLSchemes:
+              - com.ykitaguchi.gdribrain
+        # Substituted from Config/GdriBrain.xcconfig at build time.
+        GoogleOAuthClientID: $(GOOGLE_OAUTH_CLIENT_ID)
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: false
+        NSCameraUsageDescription: "Used by the Share Extension to capture screenshots for OCR."
+        NSPhotoLibraryUsageDescription: "Attach photos and screenshots to notes."
+    entitlements:
+      path: GdriBrain/GdriBrain.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ykitaguchi.gdribrain
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.ykitaguchi.gdribrain
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ykitaguchi.gdribrain
+        CODE_SIGN_ENTITLEMENTS: GdriBrain/GdriBrain.entitlements
+    dependencies:
+      - target: ShareExtension
+
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShareExtension
+      # Share enqueue-only types with the extension. We deliberately keep
+      # AnthropicClient/DriveAPI/Pipeline OUT of the extension so the API
+      # key never enters this target.
+      - path: GdriBrain/Models/Draft.swift
+      - path: GdriBrain/Networking/OfflineQueue.swift
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: GdriBrain
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsImageWithMaxCount: 1
+              NSExtensionActivationSupportsText: true
+    entitlements:
+      path: ShareExtension/ShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ykitaguchi.gdribrain
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ykitaguchi.gdribrain.ShareExtension
+        CODE_SIGN_ENTITLEMENTS: ShareExtension/ShareExtension.entitlements

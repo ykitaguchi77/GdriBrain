@@ -1,0 +1,19 @@
+# Xcode / iOS
+build/
+DerivedData/
+*.xcodeproj
+*.xcworkspace
+Pods/
+*.xcuserstate
+xcuserdata/
+
+# Generated configs (contain secrets)
+ios/Config/GdriBrain.xcconfig
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/

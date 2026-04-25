@@ -1,0 +1,6 @@
+// Copy this file to GdriBrain.xcconfig (gitignored) and fill in your
+// Google Cloud OAuth Client ID. project.yml references the file via
+// configFiles, and Info.plist's GoogleOAuthClientID key picks it up at
+// build time — no manual Info.plist editing needed.
+
+GOOGLE_OAUTH_CLIENT_ID = xxxxx.apps.googleusercontent.com
